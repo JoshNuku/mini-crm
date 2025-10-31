@@ -152,20 +152,14 @@ For detailed API endpoints, request/response formats, and examples, see [API_DOC
    - Open Postman
    - Click "Import" button
    - Select `Mini_CRM_API.postman_collection.json`
-   - Select `Mini_CRM_Local.postman_environment.json`
 
-2. **Select the environment:**
-
-   - Click the environment dropdown (top right)
-   - Select "Mini CRM - Local"
-
-3. **Obtain authentication tokens:**
+2. **Obtain authentication tokens:**
 
    - Go to "Authentication" folder
    - Run "Obtain Token Pair" request
    - Tokens are automatically saved to variables
 
-4. **Start testing:**
+3. **Start testing:**
    - All other requests will automatically use the saved token
    - Try creating a client, adding interactions, viewing statistics
 
