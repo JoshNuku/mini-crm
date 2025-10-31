@@ -143,34 +143,36 @@ POST /api/token/refresh/
 
 For detailed API endpoints, request/response formats, and examples, see [API_DOCUMENTATION.md](API_DOCUMENTATION.md)
 
-## Quick Start Example
+## API Testing with Postman
 
-1. Obtain authentication token:
+### Quick Start with Postman
 
-```bash
-curl -X POST http://localhost:8000/api/token/ \
-  -H "Content-Type: application/json" \
-  -d '{"username": "admin", "password": "yourpassword"}'
-```
+1. **Import the collection:**
 
-2. Create a client:
+   - Open Postman
+   - Click "Import" button
+   - Select `Mini_CRM_API.postman_collection.json`
+   - Select `Mini_CRM_Local.postman_environment.json`
 
-```bash
-curl -X POST http://localhost:8000/api/clients/ \
-  -H "Authorization: Bearer <your_token>" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "first_name": "John",
-    "last_name": "Doe",
-    "email": "john.doe@example.com",
-    "company": "Acme Corp",
-    "stage": "LEAD"
-  }'
-```
+2. **Select the environment:**
 
-3. Get statistics:
+   - Click the environment dropdown (top right)
+   - Select "Mini CRM - Local"
 
-```bash
-curl -X GET http://localhost:8000/api/statistics/ \
-  -H "Authorization: Bearer <your_token>"
-```
+3. **Obtain authentication tokens:**
+
+   - Go to "Authentication" folder
+   - Run "Obtain Token Pair" request
+   - Tokens are automatically saved to variables
+
+4. **Start testing:**
+   - All other requests will automatically use the saved token
+   - Try creating a client, adding interactions, viewing statistics
+
+### Collection Features
+
+- Pre-configured requests for all API endpoints
+- Automatic token management (tokens saved automatically)
+- Environment variables for easy configuration
+- Request examples with sample data
+- Organized by functional area (Clients, Interactions, Statistics)

@@ -1,0 +1,471 @@
+{
+  "info": {
+    "_postman_id": "mini-crm-api-collection",
+    "name": "Mini CRM API",
+    "description": "Complete API collection for Mini CRM system with JWT authentication",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{access_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8000/api",
+      "type": "string"
+    },
+    {
+      "key": "access_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "refresh_token",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Obtain Token Pair",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.collectionVariables.set('access_token', jsonData.access);",
+                  "    pm.collectionVariables.set('refresh_token', jsonData.refresh);",
+                  "    pm.environment.set('access_token', jsonData.access);",
+                  "    pm.environment.set('refresh_token', jsonData.refresh);",
+                  "    console.log('Tokens saved successfully');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"admin\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/token/",
+              "host": ["{{base_url}}"],
+              "path": ["token", ""]
+            },
+            "description": "Authenticate and receive access and refresh tokens. Tokens are automatically saved to collection variables."
+          },
+          "response": []
+        },
+        {
+          "name": "Refresh Access Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.collectionVariables.set('access_token', jsonData.access);",
+                  "    pm.environment.set('access_token', jsonData.access);",
+                  "    if (jsonData.refresh) {",
+                  "        pm.collectionVariables.set('refresh_token', jsonData.refresh);",
+                  "        pm.environment.set('refresh_token', jsonData.refresh);",
+                  "    }",
+                  "    console.log('Token refreshed successfully');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refresh\": \"{{refresh_token}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/token/refresh/",
+              "host": ["{{base_url}}"],
+              "path": ["token", "refresh", ""]
+            },
+            "description": "Get a new access token using the refresh token. New tokens are automatically saved."
+          },
+          "response": []
+        }
+      ],
+      "description": "Authentication endpoints for JWT token management"
+    },
+    {
+      "name": "Clients",
+      "item": [
+        {
+          "name": "List All Clients",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/clients/",
+              "host": ["{{base_url}}"],
+              "path": ["clients", ""],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Page number",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Retrieve a paginated list of all clients (50 per page)"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Client",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"first_name\": \"John\",\n  \"last_name\": \"Doe\",\n  \"email\": \"john.doe@example.com\",\n  \"phone\": \"+1234567890\",\n  \"company\": \"Acme Corp\",\n  \"address\": \"123 Main St, New York, NY\",\n  \"notes\": \"Interested in premium package\",\n  \"stage\": \"LEAD\",\n  \"assigned_to\": null\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/clients/",
+              "host": ["{{base_url}}"],
+              "path": ["clients", ""]
+            },
+            "description": "Create a new client. The created_by field is automatically set to the authenticated user."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Client Details",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/clients/1/",
+              "host": ["{{base_url}}"],
+              "path": ["clients", "1", ""]
+            },
+            "description": "Retrieve detailed information about a specific client, including all interactions"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Client (Full)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"first_name\": \"John\",\n  \"last_name\": \"Doe\",\n  \"email\": \"john.doe@example.com\",\n  \"phone\": \"+1234567890\",\n  \"company\": \"Acme Corp\",\n  \"address\": \"456 New Address, NY\",\n  \"notes\": \"Updated notes\",\n  \"stage\": \"IN_PROGRESS\",\n  \"assigned_to\": 1\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/clients/1/",
+              "host": ["{{base_url}}"],
+              "path": ["clients", "1", ""]
+            },
+            "description": "Update all fields of an existing client"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Client (Partial)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"+9876543210\",\n  \"notes\": \"Updated phone number\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/clients/1/",
+              "host": ["{{base_url}}"],
+              "path": ["clients", "1", ""]
+            },
+            "description": "Update specific fields of a client without sending all data"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Client",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/clients/1/",
+              "host": ["{{base_url}}"],
+              "path": ["clients", "1", ""]
+            },
+            "description": "Delete a client from the system"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Client Stage",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"stage\": \"ACTIVE\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/clients/1/update_stage/",
+              "host": ["{{base_url}}"],
+              "path": ["clients", "1", "update_stage", ""]
+            },
+            "description": "Update client stage and automatically log the change as an interaction. Valid stages: LEAD, IN_PROGRESS, ACTIVE"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Clients by Stage",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/clients/by_stage/?stage=LEAD",
+              "host": ["{{base_url}}"],
+              "path": ["clients", "by_stage", ""],
+              "query": [
+                {
+                  "key": "stage",
+                  "value": "LEAD",
+                  "description": "Filter by stage: LEAD, IN_PROGRESS, or ACTIVE"
+                }
+              ]
+            },
+            "description": "Filter clients by their current pipeline stage"
+          },
+          "response": []
+        }
+      ],
+      "description": "Client management endpoints"
+    },
+    {
+      "name": "Interactions",
+      "item": [
+        {
+          "name": "List All Interactions",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/interactions/",
+              "host": ["{{base_url}}"],
+              "path": ["interactions", ""],
+              "query": [
+                {
+                  "key": "client",
+                  "value": "1",
+                  "description": "Filter by client ID",
+                  "disabled": true
+                },
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Page number",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Retrieve all interactions with optional client filtering"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Interaction",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"client\": 1,\n  \"interaction_type\": \"CALL\",\n  \"subject\": \"Follow-up call\",\n  \"description\": \"Discussed product features and pricing options. Client is very interested.\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/interactions/",
+              "host": ["{{base_url}}"],
+              "path": ["interactions", ""]
+            },
+            "description": "Log a new interaction with a client. Valid types: CALL, EMAIL, MEETING, NOTE"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Interaction Details",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/interactions/1/",
+              "host": ["{{base_url}}"],
+              "path": ["interactions", "1", ""]
+            },
+            "description": "Retrieve details of a specific interaction"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Interaction",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"subject\": \"Updated subject\",\n  \"description\": \"Updated description\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/interactions/1/",
+              "host": ["{{base_url}}"],
+              "path": ["interactions", "1", ""]
+            },
+            "description": "Update an existing interaction"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Interaction",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/interactions/1/",
+              "host": ["{{base_url}}"],
+              "path": ["interactions", "1", ""]
+            },
+            "description": "Delete an interaction record"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Interactions for Client",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/interactions/?client=1",
+              "host": ["{{base_url}}"],
+              "path": ["interactions", ""],
+              "query": [
+                {
+                  "key": "client",
+                  "value": "1",
+                  "description": "Client ID to filter interactions"
+                }
+              ]
+            },
+            "description": "Get all interactions for a specific client"
+          },
+          "response": []
+        }
+      ],
+      "description": "Client interaction management endpoints"
+    },
+    {
+      "name": "Statistics & Reporting",
+      "item": [
+        {
+          "name": "Get CRM Statistics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/statistics/",
+              "host": ["{{base_url}}"],
+              "path": ["statistics", ""]
+            },
+            "description": "Get comprehensive CRM statistics including client counts, conversion rates, and activity metrics"
+          },
+          "response": []
+        }
+      ],
+      "description": "Analytics and reporting endpoints"
+    },
+    {
+      "name": "User",
+      "item": [
+        {
+          "name": "Get Current User",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/me/",
+              "host": ["{{base_url}}"],
+              "path": ["me", ""]
+            },
+            "description": "Retrieve information about the currently authenticated user"
+          },
+          "response": []
+        }
+      ],
+      "description": "User information endpoints"
+    }
+  ]
+}
