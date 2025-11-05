@@ -40,8 +40,50 @@ class ClientViewSet(viewsets.ModelViewSet):
             return ClientListSerializer
         return ClientSerializer
     
+    def list(self, request, *args, **kwargs):
+       
+        response = super().list(request, *args, **kwargs)
+        return Response({
+            'success': True,
+            'data': response.data
+        })
+    
+    def create(self, request, *args, **kwargs):
+        response = super().create(request, *args, **kwargs)
+        return Response({
+            'success': True,
+            'data': response.data
+        }, status=response.status_code)
+    
+    def retrieve(self, request, *args, **kwargs):
+        response = super().retrieve(request, *args, **kwargs)
+        return Response({
+            'success': True,
+            'data': response.data
+        })
+    
+    def update(self, request, *args, **kwargs):
+        response = super().update(request, *args, **kwargs)
+        return Response({
+            'success': True,
+            'data': response.data
+        })
+    
+    def partial_update(self, request, *args, **kwargs):
+        response = super().partial_update(request, *args, **kwargs)
+        return Response({
+            'success': True,
+            'data': response.data
+        })
+    
+    def destroy(self, request, *args, **kwargs):
+        super().destroy(request, *args, **kwargs)
+        return Response({
+            'success': True,
+            'message': 'Client deleted successfully'
+        }, status=status.HTTP_200_OK)
+    
     def perform_create(self, serializer):
-        """Set the created_by field to the current user."""
         serializer.save(created_by=self.request.user)
     
     @action(detail=True, methods=['patch'])
@@ -57,7 +99,10 @@ class ClientViewSet(viewsets.ModelViewSet):
         valid_stages = ['LEAD', 'IN_PROGRESS', 'ACTIVE']
         if stage not in valid_stages:
             return Response(
-                {'error': f'Invalid stage. Must be one of: {", ".join(valid_stages)}'},
+                {
+                    'success': False,
+                    'error': f'Invalid stage. Must be one of: {", ".join(valid_stages)}'
+                },
                 status=status.HTTP_400_BAD_REQUEST
             )
         
@@ -65,6 +110,7 @@ class ClientViewSet(viewsets.ModelViewSet):
         client.stage = stage
         client.save()
         
+        # Create an interaction to track the stage change
         ClientInteraction.objects.create(
             client=client,
             interaction_type='NOTE',
@@ -74,7 +120,10 @@ class ClientViewSet(viewsets.ModelViewSet):
         )
         
         serializer = self.get_serializer(client)
-        return Response(serializer.data)
+        return Response({
+            'success': True,
+            'data': serializer.data
+        })
     
     @action(detail=False, methods=['get'])
     def by_stage(self, request):
@@ -90,7 +139,10 @@ class ClientViewSet(viewsets.ModelViewSet):
             clients = self.queryset.all()
         
         serializer = ClientListSerializer(clients, many=True)
-        return Response(serializer.data)
+        return Response({
+            'success': True,
+            'data': serializer.data
+        })
 
 
 class ClientInteractionViewSet(viewsets.ModelViewSet):
@@ -100,6 +152,54 @@ class ClientInteractionViewSet(viewsets.ModelViewSet):
     queryset = ClientInteraction.objects.all()
     serializer_class = ClientInteractionSerializer
     permission_classes = [IsAuthenticated]
+    
+    def list(self, request, *args, **kwargs):
+        """Override list to add success wrapper."""
+        response = super().list(request, *args, **kwargs)
+        return Response({
+            'success': True,
+            'data': response.data
+        })
+    
+    def create(self, request, *args, **kwargs):
+        """Override create to add success wrapper."""
+        response = super().create(request, *args, **kwargs)
+        return Response({
+            'success': True,
+            'data': response.data
+        }, status=response.status_code)
+    
+    def retrieve(self, request, *args, **kwargs):
+        """Override retrieve to add success wrapper."""
+        response = super().retrieve(request, *args, **kwargs)
+        return Response({
+            'success': True,
+            'data': response.data
+        })
+    
+    def update(self, request, *args, **kwargs):
+        """Override update to add success wrapper."""
+        response = super().update(request, *args, **kwargs)
+        return Response({
+            'success': True,
+            'data': response.data
+        })
+    
+    def partial_update(self, request, *args, **kwargs):
+        """Override partial_update to add success wrapper."""
+        response = super().partial_update(request, *args, **kwargs)
+        return Response({
+            'success': True,
+            'data': response.data
+        })
+    
+    def destroy(self, request, *args, **kwargs):
+        """Override destroy to add success wrapper."""
+        super().destroy(request, *args, **kwargs)
+        return Response({
+            'success': True,
+            'message': 'Interaction deleted successfully'
+        }, status=status.HTTP_200_OK)
     
     def perform_create(self, serializer):
         """Set the created_by field to the current user."""
@@ -162,21 +262,24 @@ def statistics(request):
         conversion_rate = round((active_count / total_clients) * 100, 2)
     
     return Response({
-        'total_clients': total_clients,
-        'clients_by_stage': {
-            'lead': clients_by_stage.get('LEAD', 0),
-            'in_progress': clients_by_stage.get('IN_PROGRESS', 0),
-            'active': clients_by_stage.get('ACTIVE', 0),
-        },
-        'recent_clients_30_days': recent_clients,
-        'clients_by_staff': clients_by_staff,
-        'total_interactions': total_interactions,
-        'recent_interactions_30_days': recent_interactions,
-        'conversion_rate_percentage': conversion_rate,
-        'funnel': {
-            'lead': lead_count,
-            'in_progress': in_progress_count,
-            'active': active_count,
+        'success': True,
+        'data': {
+            'total_clients': total_clients,
+            'clients_by_stage': {
+                'lead': clients_by_stage.get('LEAD', 0),
+                'in_progress': clients_by_stage.get('IN_PROGRESS', 0),
+                'active': clients_by_stage.get('ACTIVE', 0),
+            },
+            'recent_clients_30_days': recent_clients,
+            'clients_by_staff': clients_by_staff,
+            'total_interactions': total_interactions,
+            'recent_interactions_30_days': recent_interactions,
+            'conversion_rate_percentage': conversion_rate,
+            'funnel': {
+                'lead': lead_count,
+                'in_progress': in_progress_count,
+                'active': active_count,
+            }
         }
     })
 
@@ -186,4 +289,7 @@ def statistics(request):
 def current_user(request):
     """Get current authenticated user information."""
     serializer = UserSerializer(request.user)
-    return Response(serializer.data)
+    return Response({
+        'success': True,
+        'data': serializer.data
+    })
