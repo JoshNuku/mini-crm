@@ -110,7 +110,6 @@ class ClientViewSet(viewsets.ModelViewSet):
         client.stage = stage
         client.save()
         
-        # Create an interaction to track the stage change
         ClientInteraction.objects.create(
             client=client,
             interaction_type='NOTE',
