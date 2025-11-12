@@ -3,9 +3,7 @@ from django.contrib.auth.models import User
 
 
 class Client(models.Model):
-    """
-    Model to represent a client in the CRM system.
-    """
+    
     STAGE_CHOICES = [
         ('LEAD', 'Lead'),
         ('IN_PROGRESS', 'In Progress'),
@@ -15,7 +13,7 @@ class Client(models.Model):
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
     email = models.EmailField(unique=True)
-    phone = models.IntegerField(blank=True, max_length=13)
+    phone = models.IntegerField(blank=True, max_length=12)
     company = models.CharField(max_length=200, blank=True)
     
     address = models.TextField(blank=True)
@@ -51,9 +49,7 @@ class Client(models.Model):
 
 
 class ClientInteraction(models.Model):
-    """
-    Model to track interactions with clients.
-    """
+    
     INTERACTION_TYPES = [
         ('CALL', 'Phone Call'),
         ('EMAIL', 'Email'),
